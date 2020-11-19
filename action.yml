@@ -1,0 +1,15 @@
+name: "Upload artifacts to s3"
+description: "Upload artifacts to s3 to improve build time"
+inputs:
+  aws-region:
+    description: "AWS region where your bucket is located"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: ./run.sh
+      env:
+        AWS_REGION: ${{ inputs.aws-region }}
+        OS: ${{ runner.os }}
+      shell: bash
