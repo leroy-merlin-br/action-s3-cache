@@ -1,0 +1,35 @@
+name: Test
+on:
+  - push
+
+jobs:
+  test_on_linux:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11.0, windows-2019]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "^1.15.5"
+      - name: Export vars
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == ubuntu-* ]]; then
+            echo "::set-output name=GOOS::linux"
+          elif [[ "${{ matrix.os }}" == macos-* ]]; then
+            echo "::set-output name=GOOS::macos"
+          else
+            echo "::set-output name=GOOS::windows"
+          fi
+      - name: Build binary
+        env:
+          GOARCH: "amd64"
+          GOOS: ${{ steps.vars.outputs.GOOS }}
+        run: go build -o dist/${{ runner.os }} main.go
+      - uses: ./
+        with:
+          aws-region: "pirapora-west"
