@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ./run.sh
+    - run: ./entrypoint.sh
       env:
         AWS_REGION: ${{ inputs.aws-region }}
         OS: ${{ runner.os }}
