@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Select right go binary for runner os
-./dist/$OS
+./dist/$(echo "$OS" | tr "[:upper:]" "[:lower:]")

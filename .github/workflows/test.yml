@@ -21,7 +21,7 @@ jobs:
           if [[ "${{ matrix.os }}" == ubuntu-* ]]; then
             echo "::set-output name=GOOS::linux"
           elif [[ "${{ matrix.os }}" == macos-* ]]; then
-            echo "::set-output name=GOOS::macos"
+            echo "::set-output name=GOOS::darwin"
           else
             echo "::set-output name=GOOS::windows"
           fi
@@ -29,7 +29,8 @@ jobs:
         env:
           GOARCH: "amd64"
           GOOS: ${{ steps.vars.outputs.GOOS }}
-        run: go build -o dist/${{ runner.os }} main.go
+        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]") main.go
+        shell: bash
       - uses: ./
         with:
           aws-region: "pirapora-west"
