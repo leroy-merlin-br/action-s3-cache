@@ -3,7 +3,7 @@ on:
   - push
 
 jobs:
-  test_on_linux:
+  test_on_machine:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
