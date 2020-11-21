@@ -20,9 +20,9 @@ jobs:
 
       - name: Build binary
         run: |
-          env GOOS=linux GOARCH=amd64 go build -o dist/linux main.go
-          env GOOS=windows GOARCH=amd64 go build -o dist/windows main.go
-          env GOOS=darwin GOARCH=amd64 go build -o dist/macos main.go
+          env GOOS=linux GOARCH=amd64 go build -o dist/linux
+          env GOOS=windows GOARCH=amd64 go build -o dist/windows
+          env GOOS=darwin GOARCH=amd64 go build -o dist/macos
 
       - name: Create release tag
         run: ls dist
