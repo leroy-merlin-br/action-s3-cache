@@ -1,5 +1,11 @@
 package main
 
+const (
+	PutAction    = "put"
+	DeleteAction = "delete"
+	GetAction    = "get"
+)
+
 type (
 	Action struct {
 		Action             string
@@ -7,6 +13,6 @@ type (
 		AwsSecretAccessKey string
 		Bucket             string
 		Key                string
-		Artifacts          string
+		Artifacts          []string
 	}
 )

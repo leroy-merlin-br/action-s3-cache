@@ -1,28 +1,10 @@
 name: "s3 Cache artifacts"
 description: "Send artifacts to s3 to improve build time"
-inputs:
-  action:
-    description: "Action to perform. Options are: put, get, delete"
-    required: true
-  aws-access-key-id:
-    description: "AWS access key id to access your bucket"
-    required: true
-  aws-secret-access-key:
-    description: "AWS secret access key to access your bucket"
-    required: true
-  bucket:
-    description: "AWS s3 bucket to store the artifacts"
-    required: true
-  key:
-    description: "An explicit key for restoring and saving the cache"
-    required: true
-  artifacts:
-    description: "A list of files, directories and wildcard patterns to cache and restore"
-
 runs:
   using: "composite"
   steps:
     - run: ./entrypoint.sh
+      shell: bash
       env:
         ACTION: ${{ inputs.action }}
         AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
@@ -31,4 +13,3 @@ runs:
         KEY: ${{ inputs.key }}
         ARTIFACTS: ${{ inputs.artifacts }}
         OS: ${{ runner.os }}
-      shell: bash

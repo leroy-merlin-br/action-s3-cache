@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"strings"
+
 	"github.com/urfave/cli"
 )
 
@@ -54,7 +56,8 @@ func main() {
 			Name:   "artifacts",
 			Usage:  "A list of files, directories and wildcard patterns to cache and restore",
 			EnvVar: "ARTIFACTS",
-			// Required: os.Args.String("") == "",
+			// Only required if action arg is == "put"
+			Required: GetOsArgValue(os.Args, os.Getenv("ACTION"), "action") == PutAction,
 		},
 	}
 
@@ -70,7 +73,7 @@ func run(c *cli.Context) error {
 		AwsAccessKeyId:     c.String("aws-access-key-id"),
 		Bucket:             c.String("bucket"),
 		Key:                c.String("key"),
-		Artifacts:          c.String("artifacts"),
+		Artifacts:          strings.Split(c.String("artifacts"), "\n"),
 	}
 
 	return action.Exec()
