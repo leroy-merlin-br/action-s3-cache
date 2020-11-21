@@ -24,6 +24,11 @@ runs:
   steps:
     - run: ./entrypoint.sh
       env:
-        AWS_REGION: ${{ inputs.aws-region }}
+        ACTION: ${{ inputs.action }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        BUCKET: ${{ inputs.bucket }}
+        KEY: ${{ inputs.key }}
+        ARTIFACTS: ${{ inputs.artifacts }}
         OS: ${{ runner.os }}
       shell: bash

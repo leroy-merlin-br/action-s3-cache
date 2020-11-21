@@ -29,13 +29,13 @@ jobs:
         env:
           GOARCH: "amd64"
           GOOS: ${{ steps.vars.outputs.GOOS }}
-        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]") main.go
+        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]")
         shell: bash
       - uses: ./
         with:
           action: "put"
-          aws-access-key-id: "1"
-          aws-secret-access-key: "1"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           bucket: "batata-bucket"
           key: "package.lock"
           artifacts: |
