@@ -1,5 +1,18 @@
 name: "s3 Cache artifacts"
 description: "Send artifacts to s3 to improve build time"
+inputs:
+  action:
+    default: ""
+  aws-access-key-id:
+    default: ""
+  aws-secret-access-key:
+    default: ""
+  bucket:
+    default: ""
+  key:
+    default: ""
+  artifacts:
+    default: ""
 runs:
   using: "composite"
   steps:
