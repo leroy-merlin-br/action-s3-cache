@@ -73,7 +73,7 @@ func run(c *cli.Context) error {
 		AwsAccessKeyId:     c.String("aws-access-key-id"),
 		Bucket:             c.String("bucket"),
 		Key:                c.String("key"),
-		Artifacts:          strings.Split(c.String("artifacts"), "\n"),
+		Artifacts:          strings.Split(strings.TrimSpace(c.String("artifacts")), "\n"),
 	}
 
 	return action.Exec()
