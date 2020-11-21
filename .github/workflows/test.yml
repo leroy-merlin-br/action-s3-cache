@@ -33,4 +33,12 @@ jobs:
         shell: bash
       - uses: ./
         with:
-          aws-region: "pirapora-west"
+          action: "put"
+          aws-access-key-id: "1"
+          aws-secret-access-key: "1"
+          bucket: "batata-bucket"
+          key: "package.lock"
+          artifacts: |
+            node_modules/**
+            batata
+            .batatarc
