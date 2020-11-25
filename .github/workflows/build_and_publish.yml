@@ -1,0 +1,36 @@
+name: Build and publish
+on:
+  push:
+    branches:
+      # - main
+      - feat/setup # replace to main
+
+jobs:
+  build_go_binary_and_release:
+    name: Build go binary and release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: "^1.15.5"
+
+      - name: Build binary
+        run: |
+          env GOOS=linux GOARCH=amd64 go build -o dist/linux
+          env GOOS=windows GOARCH=amd64 go build -o dist/windows
+          env GOOS=darwin GOARCH=amd64 go build -o dist/macos
+
+      - name: Create release tag
+        run: ls dist
+      # - name: Create release tag
+      #   run: |
+      #     git config --global user.email ""
+      #     git config --global user.name ""
+      #     git add .
+      #     git commit -m 'release: v1'
+      #     git tag v2
+      #     git push origin --tags

@@ -1,0 +1,44 @@
+name: Test
+on:
+  - push
+
+jobs:
+  test_on_machine:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11.0, windows-2019]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "^1.15.5"
+      - name: Export vars
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == ubuntu-* ]]; then
+            echo "::set-output name=GOOS::linux"
+          elif [[ "${{ matrix.os }}" == macos-* ]]; then
+            echo "::set-output name=GOOS::darwin"
+          else
+            echo "::set-output name=GOOS::windows"
+          fi
+      - name: Build binary
+        env:
+          GOARCH: "amd64"
+          GOOS: ${{ steps.vars.outputs.GOOS }}
+        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]")
+        shell: bash
+      - uses: ./
+        with:
+          action: "put"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          bucket: "batata-bucket"
+          key: "package.lock"
+          artifacts: |
+            node_modules/**
+            batata
+            .batatarc
