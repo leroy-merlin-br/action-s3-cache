@@ -1,11 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"action-s3-cache/modules/archive"
+	"fmt"
+)
 
 func (action Action) Exec() error {
 	switch act := action.Action; act {
 	case PutAction:
-		fmt.Print("PutAction")
+		_,_ = archive.CreateZip(action.Artifacts, action.Key)
 	case GetAction:
 		fmt.Print("GetAction")
 	case DeleteAction:
