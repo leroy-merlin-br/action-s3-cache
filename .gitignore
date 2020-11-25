@@ -1,2 +1,3 @@
-action-s3-cache
 .env
+temp/
+.DS_Store
