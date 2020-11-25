@@ -1,4 +1,5 @@
 source .env
-go build
+mkdir -p temp/
+go build -o temp/action-s3-cache
 
-./action-s3-cache
+cd temp && ./action-s3-cache
