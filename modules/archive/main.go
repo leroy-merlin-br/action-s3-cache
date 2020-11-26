@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func CreateZip(patterns[]string, fileName string) (string, error) {
+func Zip(patterns[]string, fileName string) (string, error) {
 	outFile, err := os.Create(fmt.Sprintf("%s.zip", fileName))
 	if err != nil {
 		return fileName, err
@@ -58,6 +58,40 @@ func CreateZip(patterns[]string, fileName string) (string, error) {
 	return fileName, nil
 }
 
-func Unzip() {
+func Unzip(fileName string) (string, error) {
+	reader, err := zip.OpenReader(fmt.Sprintf("%s.zip", fileName))
+	if err != nil {
+		return fileName, err
+	}
+	defer reader.Close()
 
+	for _, file := range reader.File {
+		if file.FileInfo().IsDir() {
+			if err := os.MkdirAll(file.Name, os.ModePerm); err != nil {
+				return fileName, err
+			}
+
+			continue
+		}
+
+		outFile, err := os.OpenFile(file.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+		if err != nil {
+			return fileName, err
+		}
+
+		currentFile, err := file.Open()
+		if err != nil {
+			return fileName, err
+		}
+
+		_, err = io.Copy(outFile, currentFile)
+		if err != nil {
+			return fileName, err
+		}
+
+		outFile.Close()
+		currentFile.Close()
+	}
+
+	return fileName, nil
 }
