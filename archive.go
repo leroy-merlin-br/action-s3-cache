@@ -2,27 +2,26 @@ package main
 
 import (
 	"archive/zip"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 )
 
 // Zip - create .zip file and add dirs and files that match glob patterns
-func Zip(patterns[]string, fileName string) (string, error) {
-	outFile, err := os.Create(fmt.Sprintf("%s.zip", fileName))
+func Zip(action Action)  error {
+	outFile, err := os.Create(action.Key)
 	if err != nil {
-		return fileName, err
+		return err
 	}
 	defer outFile.Close()
 
 	archive := zip.NewWriter(outFile)
 	defer archive.Close()
 
-	for _, pattern := range patterns {
+	for _, pattern := range action.Artifacts {
 		matches, err := filepath.Glob(pattern)
 		if err != nil {
-			return fileName, err
+			return  err
 		}
 
 		for _, match := range matches {
@@ -56,21 +55,21 @@ func Zip(patterns[]string, fileName string) (string, error) {
 		}
 	}
 
-	return fileName, nil
+	return  nil
 }
 
 // Unzip - all files and directories inside .zip file
-func Unzip(fileName string) (string, error) {
-	reader, err := zip.OpenReader(fmt.Sprintf("%s.zip", fileName))
+func Unzip(action Action) error {
+	reader, err := zip.OpenReader(action.Key)
 	if err != nil {
-		return fileName, err
+		return err
 	}
 	defer reader.Close()
 
 	for _, file := range reader.File {
 		if file.FileInfo().IsDir() {
 			if err := os.MkdirAll(file.Name, os.ModePerm); err != nil {
-				return fileName, err
+				return  err
 			}
 
 			continue
@@ -78,22 +77,22 @@ func Unzip(fileName string) (string, error) {
 
 		outFile, err := os.OpenFile(file.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
 		if err != nil {
-			return fileName, err
+			return err
 		}
 
 		currentFile, err := file.Open()
 		if err != nil {
-			return fileName, err
+			return err
 		}
 
 		_, err = io.Copy(outFile, currentFile)
 		if err != nil {
-			return fileName, err
+			return err
 		}
 
 		outFile.Close()
 		currentFile.Close()
 	}
 
-	return fileName, nil
+	return nil
 }
