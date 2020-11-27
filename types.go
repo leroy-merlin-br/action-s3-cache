@@ -9,7 +9,7 @@ const (
 type (
 	Action struct {
 		Action             string
-		AwsAccessKeyId     string
+		AwsAccessKeyID     string
 		AwsSecretAccessKey string
 		Bucket             string
 		Key                string
