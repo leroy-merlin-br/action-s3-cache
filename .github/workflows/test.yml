@@ -31,13 +31,22 @@ jobs:
           GOOS: ${{ steps.vars.outputs.GOOS }}
         run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]")
         shell: bash
+
+      - name: Create temp files
+        shell: bash
+        run: |
+          mkdir -p temp/{dir1,dir2,dir3}/{subdir1,subdir2,subdir3}
+          echo "fileexample" > temp/file.txt
+          cat temp/file.txt | tee temp/dir1/file.txt temp/dir2/file.txt temp/dir3/file.txt temp/dir1/subdir1/file.txt temp/dir2/subdir2/file.txt temp/dir3/subdir3/file.txt
+
       - uses: ./
         with:
-          action: "put"
+          action: put
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          bucket: "batata-bucket"
-          key: "package.lock"
+          aws-region: us-east-1
+          bucket: ${{ secrets.AWS_BUCKET }}
+          key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
           artifacts: |
             node_modules/**
             batata
