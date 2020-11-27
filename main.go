@@ -13,7 +13,7 @@ func main() {
 		AwsAccessKeyID: os.Getenv("AWS_ACCESS_KEY_ID"),
 		AwsSecretAccessKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
 		Bucket: os.Getenv("BUCKET"),
-		Key: os.Getenv("KEY"),
+		Key: fmt.Sprintf("%s.zip", os.Getenv("KEY")),
 		Artifacts: strings.Split(strings.TrimSpace(os.Getenv("ARTIFACTS")), "\n"),
 	}
 
@@ -23,12 +23,17 @@ func main() {
 			log.Fatal("no artifacts provided")
 		}
 
-		_, err := Zip(action.Artifacts, action.Key)
+		err := Zip(action)
+		if err != nil {
+			log.Fatal(err)
+		}
+	
+		err = PutObject(action)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case GetAction:
-		_, err := Unzip(action.Key)
+		err := Unzip(action)
 		if err != nil {
 			log.Fatal(err)
 		}
