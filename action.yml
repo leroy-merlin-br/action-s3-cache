@@ -2,17 +2,23 @@ name: "s3 Cache artifacts"
 description: "Send artifacts to s3 to improve build time"
 inputs:
   action:
-    default: ""
+    description: "Action to perform. Options are: put, get, delete"
+    required: true
   aws-access-key-id:
-    default: ""
+    description: "AWS access key id to access your bucket"
+    required: true
   aws-secret-access-key:
-    default: ""
+    description: "AWS secret access key to access your bucket"
+    required: true
   bucket:
-    default: ""
+    description: "AWS s3 bucket to store the artifacts"
+    required: true
   key:
-    default: ""
+    description: "An explicit key for restoring and saving the cache"
+    required: true
   artifacts:
-    default: ""
+    description: "A list of files, directories and wildcard patterns to cache and restore"
+    required: false
 runs:
   using: "composite"
   steps:
