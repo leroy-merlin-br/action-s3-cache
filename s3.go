@@ -56,6 +56,18 @@ func GetObject(action Action) error {
 }
 
 // DeleteObject - Delete object from s3 bucket
-func DeleteObject() {
+func DeleteObject(action Action) error {
+	session := session.Must(session.NewSession())
+	service := s3.New(session)
 
+	_, err := service.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: &action.Bucket,
+		Key: &action.Key,
+	})
+
+	if err == nil {
+		fmt.Printf("%s file deleted with sucess", action.Key)
+	}
+
+	return err
 }

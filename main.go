@@ -39,7 +39,9 @@ func main() {
 			log.Fatal(err)
 		}
 	case DeleteAction:
-		fmt.Print("DeleteAction")
+		if err := DeleteObject(action); err != nil {
+			log.Fatal(err)
+		}
 	default: 
 		fmt.Printf("Action \"%s\" is not allowed. Valid options are: [%s, %s, %s]", act, PutAction, DeleteAction, GetAction)
 	}
