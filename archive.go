@@ -1,4 +1,4 @@
-package archive
+package main
 
 import (
 	"archive/zip"

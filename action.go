@@ -1,7 +1,6 @@
 package main
 
 import (
-	"action-s3-cache/modules/archive"
 	"fmt"
 	"log"
 )
@@ -9,13 +8,13 @@ import (
 func (action Action) Exec() error {
 	switch act := action.Action; act {
 	case PutAction:
-		_, err := archive.Zip(action.Artifacts, action.Key)
+		_, err := Zip(action.Artifacts, action.Key)
 		if err != nil {
 			log.Fatal(err)
 			return err
 		}
 	case GetAction:
-		_, err := archive.Unzip(action.Key)
+		_, err := Unzip(action.Key)
 		if err != nil {
 			log.Fatal(err)
 			return err
