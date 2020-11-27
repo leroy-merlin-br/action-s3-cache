@@ -10,10 +10,14 @@ jobs:
       matrix:
         os: [ubuntu-20.04, macos-11.0, windows-2019]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
         with:
-          go-version: "^1.15.5"
+          go-version: ^1.15.5
+
       - name: Export vars
         id: vars
         shell: bash
@@ -25,9 +29,10 @@ jobs:
           else
             echo "::set-output name=GOOS::windows"
           fi
+
       - name: Build binary
         env:
-          GOARCH: "amd64"
+          GOARCH: amd64
           GOOS: ${{ steps.vars.outputs.GOOS }}
         run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]")
         shell: bash
@@ -39,7 +44,8 @@ jobs:
           echo "fileexample" > temp/file.txt
           cat temp/file.txt | tee temp/dir1/file.txt temp/dir2/file.txt temp/dir3/file.txt temp/dir1/subdir1/file.txt temp/dir2/subdir2/file.txt temp/dir3/subdir3/file.txt
 
-      - uses: ./
+      - name: Put cache
+        uses: ./
         with:
           action: put
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -48,6 +54,32 @@ jobs:
           bucket: ${{ secrets.AWS_BUCKET }}
           key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
           artifacts: |
-            node_modules/**
-            batata
-            .batatarc
+            temp/*
+
+      - name: Remove temp folder
+        shell: bash
+        run: rm -rf temp
+
+      - name: Get cache
+        uses: ./
+        with:
+          action: get
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          bucket: ${{ secrets.AWS_BUCKET }}
+          key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
+
+      - name: List cache folder
+        shell: bash
+        run: ls temp
+
+      - name: Delete cache
+        uses: ./
+        with:
+          action: delete
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          bucket: ${{ secrets.AWS_BUCKET }}
+          key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
