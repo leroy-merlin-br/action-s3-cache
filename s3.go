@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -34,25 +35,30 @@ func PutObject(action Action) error {
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(action Action) error {
+func GetObject(action Action) (int64, error) {
+	size := int64(0)
 	session := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(session)
 
 	file, err := os.Create(action.Key)
 	if err != nil {
-		return nil
+		return size, err
 	}
 
-	size, err := downloader.Download(file, &s3.GetObjectInput{
+	size, err = downloader.Download(file, &s3.GetObjectInput{
 		Bucket: &action.Bucket,
 		Key: &action.Key,
 	})
-	
-	if err == nil {
-		fmt.Printf("%s file downloaded with %d bytes", action.Key, size)
+	if err != nil {
+		// ignore error if is a s3.ErrCodeNoSuchKey
+		if aerr := err.(awserr.Error); aerr.Code() !=  s3.ErrCodeNoSuchKey{
+			return size, err
+		}
 	}
 
-	return err
+	fmt.Printf("%s file downloaded with %d bytes", action.Key, size)
+
+	return size, nil
 }
 
 // DeleteObject - Delete object from s3 bucket
