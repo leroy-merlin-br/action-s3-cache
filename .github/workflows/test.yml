@@ -1,6 +1,9 @@
 name: Test
 on:
-  - push
+  push:
+    branches:
+      # - main
+      - feat/setup # replace to main
 
 jobs:
   test_on_machine:

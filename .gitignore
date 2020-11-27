@@ -2,3 +2,4 @@
 temp/
 .DS_Store
 action-s3-cache
+node_modules

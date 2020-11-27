@@ -1,0 +1,26 @@
+{
+  "name": "action-s3-cache",
+  "version": "1.0.0",
+  "description": "Github action to cache artifacts to s3 bucket",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leroy-merlin-br/action-s3-cache.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leroy-merlin-br/action-s3-cache/issues"
+  },
+  "homepage": "https://github.com/leroy-merlin-br/action-s3-cache#readme",
+  "dependencies": {
+    "grunt": "^1.3.0",
+    "gulp": "^4.0.2",
+    "next": "^10.0.3",
+    "react": "^17.0.1",
+    "react-native": "^0.63.3"
+  }
+}

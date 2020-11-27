@@ -31,13 +31,17 @@ func main() {
 			log.Fatal(err)
 		}
 	case GetAction:
-		if err := GetObject(action); err != nil {
+		objectExists, err := GetObject(action)
+		if err != nil {
 			log.Fatal(err)
 		}
 
-		if err := Unzip(action); err != nil {
-			log.Fatal(err)
+		if (objectExists) {
+			if err := Unzip(action); err != nil {
+				log.Fatal(err)
+			}
 		}
+
 	case DeleteAction:
 		if err := DeleteObject(action); err != nil {
 			log.Fatal(err)

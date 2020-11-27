@@ -1,0 +1,53 @@
+name: Test
+on:
+  push:
+    branches:
+      - feat/test-node_modules
+
+jobs:
+  testt:
+    name: Test ubuntu
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15.5
+
+      - name: Build binary
+        env:
+          GOARCH: amd64
+          GOOS: linux
+        run: go build -o dist/$(echo "${{ runner.os }}" | tr "[:upper:]" "[:lower:]")
+        shell: bash
+
+      - name: Test
+        run: echo " ${{ hashFiles('yarn.lock') }}"
+
+      - name: Retrieve cache
+        uses: ./
+        with:
+          action: get
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          bucket: lmbr-ci-cache
+          key: ${{ hashFiles('yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Save cache
+        uses: ./
+        with:
+          action: put
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          bucket: lmbr-ci-cache
+          key: ${{ hashFiles('yarn.lock') }}
+          artifacts: |
+            node_modules/*
