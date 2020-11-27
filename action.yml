@@ -10,6 +10,9 @@ inputs:
   aws-secret-access-key:
     description: "AWS secret access key to access your bucket"
     required: true
+  aws-region:
+    description: "AWS region where your bucket is located"
+    required: true
   bucket:
     description: "AWS s3 bucket to store the artifacts"
     required: true
@@ -28,6 +31,7 @@ runs:
         ACTION: ${{ inputs.action }}
         AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_REGION: ${{ inputs.aws-region }}
         BUCKET: ${{ inputs.bucket }}
         KEY: ${{ inputs.key }}
         ARTIFACTS: ${{ inputs.artifacts }}
