@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 )
 
+// Zip - create .zip file and add dirs and files that match glob patterns
 func Zip(patterns[]string, fileName string) (string, error) {
 	outFile, err := os.Create(fmt.Sprintf("%s.zip", fileName))
 	if err != nil {
@@ -58,6 +59,7 @@ func Zip(patterns[]string, fileName string) (string, error) {
 	return fileName, nil
 }
 
+// Unzip - all files and directories inside .zip file
 func Unzip(fileName string) (string, error) {
 	reader, err := zip.OpenReader(fmt.Sprintf("%s.zip", fileName))
 	if err != nil {
