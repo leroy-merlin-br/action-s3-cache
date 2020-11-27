@@ -67,11 +67,11 @@ func Unzip(action Action) error {
 	defer reader.Close()
 
 	for _, file := range reader.File {
-		if file.FileInfo().IsDir() {
-			if err := os.MkdirAll(file.Name, os.ModePerm); err != nil {
-				return  err
-			}
+		if err := os.MkdirAll(filepath.Dir(file.Name), os.ModePerm); err != nil {
+			return  err
+		}
 
+		if file.FileInfo().IsDir() {
 			continue
 		}
 
@@ -85,11 +85,10 @@ func Unzip(action Action) error {
 			return err
 		}
 
-		_, err = io.Copy(outFile, currentFile)
-		if err != nil {
+		if _, err = io.Copy(outFile, currentFile); err != nil {
 			return err
 		}
-
+		
 		outFile.Close()
 		currentFile.Close()
 	}

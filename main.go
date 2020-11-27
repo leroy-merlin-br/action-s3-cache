@@ -33,7 +33,12 @@ func main() {
 			log.Fatal(err)
 		}
 	case GetAction:
-		err := Unzip(action)
+		err := GetObject(action)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = Unzip(action)
 		if err != nil {
 			log.Fatal(err)
 		}
