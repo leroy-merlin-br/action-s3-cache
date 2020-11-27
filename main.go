@@ -23,23 +23,19 @@ func main() {
 			log.Fatal("no artifacts provided")
 		}
 
-		err := Zip(action)
-		if err != nil {
+		if err := Zip(action); err != nil {
 			log.Fatal(err)
 		}
 	
-		err = PutObject(action)
-		if err != nil {
+		if err := PutObject(action); err != nil {
 			log.Fatal(err)
 		}
 	case GetAction:
-		err := GetObject(action)
-		if err != nil {
+		if err := GetObject(action); err != nil {
 			log.Fatal(err)
 		}
 
-		err = Unzip(action)
-		if err != nil {
+		if err := Unzip(action); err != nil {
 			log.Fatal(err)
 		}
 	case DeleteAction:
