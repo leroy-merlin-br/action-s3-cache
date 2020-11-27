@@ -1,6 +1,88 @@
-# action-s3-cache
+# Leroy Merlin Action s3 cache
 
-Github action to cache dependencies and build outputs to s3 bucket
+Github action to cache artifacts to s3 bucket
+
+## Usage
+
+### Saving
+
+```yml
+- name: Save cache
+  uses: ./
+  with:
+    action: put
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+    bucket: your-bucket
+    key: ${{ hashFiles('yarn.lock') }}
+    artifacts: |
+      yourartifacts/*
+      separated.by
+      newline/*
+```
+
+### Retrieving
+
+```yml
+- name: Retrieve cache
+  uses: ./
+  with:
+    action: get
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+    bucket: your-bucket
+    key: ${{ hashFiles('yarn.lock') }}
+```
+
+### Cleaning
+
+```yml
+- name: Clear cache
+  uses: ./
+  with:
+    action: delete
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+    bucket: your-bucket
+    key: ${{ hashFiles('yarn.lock') }}
+```
+
+### Sample pipeline
+
+```yml
+- name: Checkout
+  uses: actions/checkout@v2
+
+- name: Retrieve cache
+  uses: ./
+  with:
+    action: get
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+    bucket: your-bucket
+    key: ${{ hashFiles('yarn.lock') }}
+
+- name: Install dependencies
+  run: yarn
+
+- name: Save cache
+  uses: ./
+  with:
+    action: put
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+    bucket: your-bucket
+    key: ${{ hashFiles('yarn.lock') }}
+    artifacts: |
+      yourartifacts/*
+      separated.by
+      newline/*
+```
 
 ## Running locally
 
