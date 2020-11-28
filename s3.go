@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,13 +22,13 @@ func PutObject(action Action) error {
 	}
 	defer file.Close()
 
-	result, err := uploader.Upload(&s3manager.UploadInput{
+	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(action.Bucket),
 		Key:    aws.String(action.Key),
 		Body:   file,
 	})
 	if err == nil {
-		fmt.Printf("Cache saved successfully at %s", result.Location)
+		log.Print("Cache saved successfully")
 	}
 
 	return err
@@ -49,7 +49,7 @@ func GetObject(action Action) error {
 		Key:    &action.Key,
 	})
 
-	fmt.Printf("%s file downloaded successfully, containing %d bytes", action.Key, size)
+	log.Printf("Cache downloaded successfully, containing %d bytes", size)
 
 	return err
 }
@@ -64,7 +64,7 @@ func DeleteObject(action Action) error {
 		Key:    &action.Key,
 	})
 	if err == nil {
-		fmt.Printf("%s cache purged successfully", action.Key)
+		log.Print("Cache purged successfully")
 	}
 
 	return err
@@ -79,7 +79,7 @@ func ObjectExists(action Action) (bool, error) {
 		Bucket: &action.Bucket,
 		Key:    &action.Key,
 	}); err != nil {
-		if aerr := err.(awserr.Error); aerr.Code() == s3.ErrCodeNoSuchKey {
+		if aerr := err.(awserr.Error); aerr.Code() == ErrCodeNotFound {
 			return false, nil
 		}
 

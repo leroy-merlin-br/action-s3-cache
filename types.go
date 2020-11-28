@@ -2,13 +2,16 @@ package main
 
 const (
 	// PutAction - Put artifacts
-	PutAction    = "put"
+	PutAction = "put"
 
 	// DeleteAction - Delete artifacts
 	DeleteAction = "delete"
 
 	// GetAction - Get artifacts
-	GetAction    = "get"
+	GetAction = "get"
+
+	// ErrCodeNotFound - s3 Not found error code
+	ErrCodeNotFound = "NotFound"
 )
 
 type (

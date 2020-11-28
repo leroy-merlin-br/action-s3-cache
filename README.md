@@ -17,9 +17,7 @@ Github action to cache artifacts to s3 bucket
     bucket: your-bucket
     key: ${{ hashFiles('yarn.lock') }}
     artifacts: |
-      yourartifacts/*
-      separated.by
-      newline/*
+      node_modules*
 ```
 
 ### Retrieving
@@ -79,9 +77,7 @@ Github action to cache artifacts to s3 bucket
     bucket: your-bucket
     key: ${{ hashFiles('yarn.lock') }}
     artifacts: |
-      yourartifacts/*
-      separated.by
-      newline/*
+      node_modules/*
 ```
 
 ## Running locally

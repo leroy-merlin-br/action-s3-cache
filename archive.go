@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 )
 
-// Zip - create .zip file and add dirs and files that match glob patterns
-func Zip(action Action)  error {
+// Zip - Create .zip file and add dirs and files that match glob patterns
+func Zip(action Action) error {
 	outFile, err := os.Create(action.Key)
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func Zip(action Action)  error {
 	for _, pattern := range action.Artifacts {
 		matches, err := filepath.Glob(pattern)
 		if err != nil {
-			return  err
+			return err
 		}
 
 		for _, match := range matches {
@@ -50,15 +50,16 @@ func Zip(action Action)  error {
 				defer file.Close()
 
 				_, err = io.Copy(writter, file)
+
 				return err
 			})
 		}
 	}
 
-	return  nil
+	return nil
 }
 
-// Unzip - all files and directories inside .zip file
+// Unzip - Unzip all files and directories inside .zip file
 func Unzip(action Action) error {
 	reader, err := zip.OpenReader(action.Key)
 	if err != nil {
@@ -68,7 +69,7 @@ func Unzip(action Action) error {
 
 	for _, file := range reader.File {
 		if err := os.MkdirAll(filepath.Dir(file.Name), os.ModePerm); err != nil {
-			return  err
+			return err
 		}
 
 		if file.FileInfo().IsDir() {
@@ -88,7 +89,7 @@ func Unzip(action Action) error {
 		if _, err = io.Copy(outFile, currentFile); err != nil {
 			return err
 		}
-		
+
 		outFile.Close()
 		currentFile.Close()
 	}
