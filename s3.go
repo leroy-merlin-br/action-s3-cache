@@ -1,4 +1,5 @@
 package main
+
 import (
 	"fmt"
 	"os"
@@ -23,42 +24,34 @@ func PutObject(action Action) error {
 
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(action.Bucket),
-		Key: aws.String(action.Key),
-		Body: file,
+		Key:    aws.String(action.Key),
+		Body:   file,
 	})
-
 	if err == nil {
-		fmt.Printf("Cache successfully saved at %s", result.Location)
+		fmt.Printf("Cache saved successfully at %s", result.Location)
 	}
 
 	return err
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(action Action) (int64, error) {
-	size := int64(0)
+func GetObject(action Action) error {
 	session := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(session)
 
 	file, err := os.Create(action.Key)
 	if err != nil {
-		return size, err
+		return err
 	}
 
-	size, err = downloader.Download(file, &s3.GetObjectInput{
+	size, err := downloader.Download(file, &s3.GetObjectInput{
 		Bucket: &action.Bucket,
-		Key: &action.Key,
+		Key:    &action.Key,
 	})
-	if err != nil {
-		// ignore error if is a s3.ErrCodeNoSuchKey
-		if aerr := err.(awserr.Error); aerr.Code() !=  s3.ErrCodeNoSuchKey{
-			return size, err
-		}
-	}
 
-	fmt.Printf("%s file downloaded with %d bytes", action.Key, size)
+	fmt.Printf("%s file downloaded successfully, containing %d bytes", action.Key, size)
 
-	return size, nil
+	return err
 }
 
 // DeleteObject - Delete object from s3 bucket
@@ -68,12 +61,30 @@ func DeleteObject(action Action) error {
 
 	_, err := service.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: &action.Bucket,
-		Key: &action.Key,
+		Key:    &action.Key,
 	})
-
 	if err == nil {
-		fmt.Printf("%s file deleted with sucess", action.Key)
+		fmt.Printf("%s cache purged successfully", action.Key)
 	}
 
 	return err
+}
+
+// ObjectExists - Verify if object exists in s3
+func ObjectExists(action Action) (bool, error) {
+	session := session.Must(session.NewSession())
+	service := s3.New(session)
+
+	if _, err := service.HeadObject(&s3.HeadObjectInput{
+		Bucket: &action.Bucket,
+		Key:    &action.Key,
+	}); err != nil {
+		if aerr := err.(awserr.Error); aerr.Code() == s3.ErrCodeNoSuchKey {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
 }
