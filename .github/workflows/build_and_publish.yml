@@ -1,0 +1,81 @@
+name: Build and publish
+on:
+  push:
+    tags-ignore:
+      - '*.*'
+    branches:
+      - main
+      - develop
+
+jobs:
+  build_go_binary_and_release:
+    name: Build go binary and release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15.5
+
+      - name: Build binary
+        run: |
+          env GOOS=linux GOARCH=amd64 go build -o dist/linux
+          env GOOS=windows GOARCH=amd64 go build -o dist/windows
+          env GOOS=darwin GOARCH=amd64 go build -o dist/macos
+
+      - name: Output vars
+        id: vars
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LAST_TAG=$(git for-each-ref "refs/tags/v*" --sort=-committerdate:relative --format='%(refname)' --count=1 | sed "s/refs\/tags\///" )
+          LAST_TAG_CONTAINS_RC=false
+          IS_PRE_RELEASE=false
+          BUMP_TYPE="patch"
+
+          if [[ $LAST_TAG == *"-rc"* ]]; then
+              LAST_TAG_CONTAINS_RC=true
+          fi
+
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+              IS_PRE_RELEASE=true
+
+              if [[ $LAST_TAG_CONTAINS_RC == true ]]; then
+                  BUMP_TYPE=prerelease
+              else
+                  BUMP_TYPE=prepatch
+              fi
+          else
+              BUMP_TYPE=patch
+          fi
+
+          NEXT_VERSION="v$(npx semver "$LAST_TAG" -i $BUMP_TYPE --preid rc)"
+          
+          echo "::set-output name=is-pre-release::$IS_PRE_RELEASE"
+          echo "::set-output name=next-version::$NEXT_VERSION"
+
+      - name: Create tag
+        run: |
+          git config --global user.email "${{ github.event.pusher.email }}"
+          git config --global user.name "${{ github.event.pusher.name }}"
+          git add .
+          git commit -m 'release: ${{ steps.vars.outputs.next-version }}'
+          git tag ${{ steps.vars.outputs.next-version }}
+          git push origin --tags
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.vars.outputs.next-version }}
+          release_name: ${{ steps.vars.outputs.next-version }}
+          body: ''
+          draft: false
+          prerelease: ${{ steps.vars.outputs.is-pre-release }}
