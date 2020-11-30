@@ -12,19 +12,19 @@ import (
 )
 
 // PutObject - Upload object to s3 bucket
-func PutObject(action Action) error {
+func PutObject(key string, bucket string) error {
 	session := session.Must(session.NewSession())
 	uploader := s3manager.NewUploader(session)
 
-	file, err := os.Open(action.Key)
+	file, err := os.Open(key)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(action.Bucket),
-		Key:    aws.String(action.Key),
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
 		Body:   file,
 	})
 	if err == nil {
@@ -35,18 +35,18 @@ func PutObject(action Action) error {
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(action Action) error {
+func GetObject(key string, bucket string) error {
 	session := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(session)
 
-	file, err := os.Create(action.Key)
+	file, err := os.Create(key)
 	if err != nil {
 		return err
 	}
 
 	size, err := downloader.Download(file, &s3.GetObjectInput{
-		Bucket: &action.Bucket,
-		Key:    &action.Key,
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
 	})
 
 	log.Printf("Cache downloaded successfully, containing %d bytes", size)
@@ -55,13 +55,13 @@ func GetObject(action Action) error {
 }
 
 // DeleteObject - Delete object from s3 bucket
-func DeleteObject(action Action) error {
+func DeleteObject(key string, bucket string) error {
 	session := session.Must(session.NewSession())
 	service := s3.New(session)
 
 	_, err := service.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: &action.Bucket,
-		Key:    &action.Key,
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
 	})
 	if err == nil {
 		log.Print("Cache purged successfully")
@@ -71,13 +71,13 @@ func DeleteObject(action Action) error {
 }
 
 // ObjectExists - Verify if object exists in s3
-func ObjectExists(action Action) (bool, error) {
+func ObjectExists(key string, bucket string) (bool, error) {
 	session := session.Must(session.NewSession())
 	service := s3.New(session)
 
 	if _, err := service.HeadObject(&s3.HeadObjectInput{
-		Bucket: &action.Bucket,
-		Key:    &action.Key,
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
 	}); err != nil {
 		if aerr := err.(awserr.Error); aerr.Code() == ErrCodeNotFound {
 			return false, nil

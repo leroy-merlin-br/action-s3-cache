@@ -8,8 +8,8 @@ import (
 )
 
 // Zip - Create .zip file and add dirs and files that match glob patterns
-func Zip(action Action) error {
-	outFile, err := os.Create(action.Key)
+func Zip(filename string, artifacts []string) error {
+	outFile, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
@@ -18,7 +18,7 @@ func Zip(action Action) error {
 	archive := zip.NewWriter(outFile)
 	defer archive.Close()
 
-	for _, pattern := range action.Artifacts {
+	for _, pattern := range artifacts {
 		matches, err := filepath.Glob(pattern)
 		if err != nil {
 			return err
@@ -60,8 +60,8 @@ func Zip(action Action) error {
 }
 
 // Unzip - Unzip all files and directories inside .zip file
-func Unzip(action Action) error {
-	reader, err := zip.OpenReader(action.Key)
+func Unzip(filename string) error {
+	reader, err := zip.OpenReader(filename)
 	if err != nil {
 		return err
 	}

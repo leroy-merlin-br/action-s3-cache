@@ -17,11 +17,9 @@ const (
 type (
 	// Action - Input params
 	Action struct {
-		Action             string
-		AwsAccessKeyID     string
-		AwsSecretAccessKey string
-		Bucket             string
-		Key                string
-		Artifacts          []string
+		Action    string
+		Bucket    string
+		Key       string
+		Artifacts []string
 	}
 )
