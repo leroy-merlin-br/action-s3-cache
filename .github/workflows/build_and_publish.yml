@@ -4,8 +4,8 @@ on:
     tags-ignore:
       - '*.*'
     branches:
-      # - main
-      - feat/s3 # replace to main
+      - main
+      - develop
 
 jobs:
   build_go_binary_and_release:
@@ -42,7 +42,7 @@ jobs:
               LAST_TAG_CONTAINS_RC=true
           fi
 
-          if [[ "${{ github.ref }}" == "refs/heads/feat/s3s" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
               IS_PRE_RELEASE=true
 
               if [[ $LAST_TAG_CONTAINS_RC == true ]]; then
@@ -72,7 +72,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.vars.outputs.next-version }}
           release_name: ${{ steps.vars.outputs.next-version }}
