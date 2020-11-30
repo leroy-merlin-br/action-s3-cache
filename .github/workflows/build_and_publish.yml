@@ -22,11 +22,19 @@ jobs:
         with:
           go-version: ^1.15.5
 
-      - name: Build binary
+      # - name: Build binary
+      #   run: |
+      #     env GOOS=linux GOARCH=amd64 go build -o dist/linux
+      #     env GOOS=windows GOARCH=amd64 go build -o dist/windows
+      #     env GOOS=darwin GOARCH=amd64 go build -o dist/macos
+
+      - name: Output vars
+        id: vars
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          env GOOS=linux GOARCH=amd64 go build -o dist/linux
-          env GOOS=windows GOARCH=amd64 go build -o dist/windows
-          env GOOS=darwin GOARCH=amd64 go build -o dist/macos
+          SUFIX=""
+          LAST_VERSION=""
 
       - name: Output vars
         id: vars
