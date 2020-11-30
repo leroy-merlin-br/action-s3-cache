@@ -28,10 +28,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ./entrypoint.sh
+    - run: ${{ github.action_path }}/entrypoint.sh
       shell: bash
       env:
         ACTION: ${{ inputs.action }}
+        ACTION_PATH: ${{ github.action_path }}
         AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
         AWS_REGION: ${{ inputs.aws-region }}

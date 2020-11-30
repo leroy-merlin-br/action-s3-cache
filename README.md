@@ -12,6 +12,8 @@ GitHub Action that allows you to cache build artifacts to S3
 
 Set up the following AWS credentials as secrets in your repository, `AWS_ACCESS_KEY_ID` and `AWS_ACCESS_KEY_ID`
 
+S3 Cache for GitHub Actions supports builds on Linux, Windows and MacOS.
+
 ### Archiving artifacts
 
 ```yml
