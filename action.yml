@@ -1,5 +1,8 @@
-name: "s3 Cache artifacts"
-description: "Send artifacts to s3 to improve build time"
+name: "S3 Cache for GitHub Actions"
+description: "GitHub Action that allows you to cache build artifacts to S3"
+branding:
+  icon: "archive"
+  color: "green"
 inputs:
   action:
     description: "Action to perform. Options are: put, get, delete"
