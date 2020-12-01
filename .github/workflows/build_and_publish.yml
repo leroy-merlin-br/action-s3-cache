@@ -2,7 +2,7 @@ name: Build and publish
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - "*.*"
     branches:
       - main
       - develop
@@ -55,17 +55,20 @@ jobs:
           fi
 
           NEXT_VERSION="v$(npx semver "$LAST_TAG" -i $BUMP_TYPE --preid rc)"
-          
           echo "::set-output name=is-pre-release::$IS_PRE_RELEASE"
           echo "::set-output name=next-version::$NEXT_VERSION"
 
       - name: Create tag
         run: |
+          MAJOR_TAG=$(echo "${{ steps.vars.outputs.next-version }}" | sed "s/\..*//")
+
           git config --global user.email "${{ github.event.pusher.email }}"
           git config --global user.name "${{ github.event.pusher.name }}"
           git add .
           git commit -m 'release: ${{ steps.vars.outputs.next-version }}'
           git tag ${{ steps.vars.outputs.next-version }}
+          git tag $MAJOR_TAG -f -a -m "Update tag with version ${{ steps.vars.outputs.next-version }}"
+          git push origin tag $MAJOR_TAG --force
           git push origin --tags
 
       - name: Create Release
@@ -76,6 +79,6 @@ jobs:
         with:
           tag_name: ${{ steps.vars.outputs.next-version }}
           release_name: ${{ steps.vars.outputs.next-version }}
-          body: ''
+          body: ""
           draft: false
           prerelease: ${{ steps.vars.outputs.is-pre-release }}

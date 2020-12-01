@@ -28,7 +28,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ${{ github.action_path }}/entrypoint.sh
+    - run: ${{ github.action_path }}entrypoint.sh
       shell: bash
       env:
         ACTION: ${{ inputs.action }}
