@@ -2,9 +2,9 @@ name: Test
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - "*.*"
     branches:
-      - '**'
+      - "**"
 
 jobs:
   test_on_machine:
