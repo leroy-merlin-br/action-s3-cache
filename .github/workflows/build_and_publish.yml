@@ -55,6 +55,7 @@ jobs:
           fi
 
           NEXT_VERSION="v$(npx semver "$LAST_TAG" -i $BUMP_TYPE --preid rc)"
+
           echo "::set-output name=is-pre-release::$IS_PRE_RELEASE"
           echo "::set-output name=next-version::$NEXT_VERSION"
 
