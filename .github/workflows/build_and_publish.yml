@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - develop
+      - ops/workflow-filter-and-tag-management
 
 jobs:
   build_go_binary_and_release:
@@ -42,7 +43,7 @@ jobs:
               LAST_TAG_CONTAINS_RC=true
           fi
 
-          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/ops/workflow-filter-and-tag-management" ]]; then
               IS_PRE_RELEASE=true
 
               if [[ $LAST_TAG_CONTAINS_RC == true ]]; then
@@ -67,8 +68,8 @@ jobs:
           git add .
           git commit -m 'release: ${{ steps.vars.outputs.next-version }}'
           git tag ${{ steps.vars.outputs.next-version }}
-          git tag $MAJOR_TAG -f -a -m "Update tag with version ${{ steps.vars.outputs.next-version }}"
-          git push origin tag $MAJOR_TAG --force
+          # git tag $MAJOR_TAG -f -a -m "Update tag with version ${{ steps.vars.outputs.next-version }}"
+          # git push origin tag $MAJOR_TAG --force
           git push origin --tags
 
       - name: Create Release
