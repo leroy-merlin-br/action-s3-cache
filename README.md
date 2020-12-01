@@ -18,7 +18,7 @@ S3 Cache for GitHub Actions supports builds on Linux, Windows and MacOS.
 
 ```yml
 - name: Save cache
-  uses: leroy-merlin-br/action-s3-cache@v1
+  uses: leroy-merlin-br/action-s3-cache@v1.0.3
   with:
     action: put
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -34,7 +34,7 @@ S3 Cache for GitHub Actions supports builds on Linux, Windows and MacOS.
 
 ```yml
 - name: Retrieve cache
-  uses: leroy-merlin-br/action-s3-cache@v1
+  uses: leroy-merlin-br/action-s3-cache@v1.0.3
   with:
     action: get
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -48,7 +48,7 @@ S3 Cache for GitHub Actions supports builds on Linux, Windows and MacOS.
 
 ```yml
 - name: Clear cache
-  uses: leroy-merlin-br/action-s3-cache@v1
+  uses: leroy-merlin-br/action-s3-cache@v1.0.3
   with:
     action: delete
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -68,7 +68,7 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
   uses: actions/checkout@v2
 
 - name: Retrieve cache
-  uses: leroy-merlin-br/action-s3-cache@v1
+  uses: leroy-merlin-br/action-s3-cache@v1.0.3
   with:
     action: get
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -81,7 +81,7 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
   run: yarn
 
 - name: Save cache
-  uses: leroy-merlin-br/action-s3-cache@v1
+  uses: leroy-merlin-br/action-s3-cache@v1.0.3
   with:
     action: put
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
