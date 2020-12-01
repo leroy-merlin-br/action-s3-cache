@@ -61,16 +61,19 @@ jobs:
 
       - name: Create tag
         run: |
-          MAJOR_TAG=$(echo "${{ steps.vars.outputs.next-version }}" | sed "s/\..*//")
-
           git config --global user.email "${{ github.event.pusher.email }}"
           git config --global user.name "${{ github.event.pusher.name }}"
           git add .
           git commit -m 'release: ${{ steps.vars.outputs.next-version }}'
           git tag ${{ steps.vars.outputs.next-version }}
-          git tag $MAJOR_TAG -f -a -m "Update tag with version ${{ steps.vars.outputs.next-version }}"
-          git push origin tag $MAJOR_TAG --force
           git push origin --tags
+
+          if [[ "${{ steps.vars.outputs.is-pre-release }}" == false ]]; then
+            MAJOR_TAG=$(echo "${{ steps.vars.outputs.next-version }}" | sed "s/\..*//")
+
+            git tag $MAJOR_TAG -f -a -m "Update tag with version ${{ steps.vars.outputs.next-version }}"
+            git push origin tag $MAJOR_TAG --force
+          fi
 
       - name: Create Release
         id: create_release
