@@ -2,7 +2,7 @@ name: Build and publish
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - "*.*"
     branches:
       - main
       - develop
@@ -55,7 +55,7 @@ jobs:
           fi
 
           NEXT_VERSION="v$(npx semver "$LAST_TAG" -i $BUMP_TYPE --preid rc)"
-          
+
           echo "::set-output name=is-pre-release::$IS_PRE_RELEASE"
           echo "::set-output name=next-version::$NEXT_VERSION"
 
@@ -68,6 +68,13 @@ jobs:
           git tag ${{ steps.vars.outputs.next-version }}
           git push origin --tags
 
+          if [[ "${{ steps.vars.outputs.is-pre-release }}" == false ]]; then
+            MAJOR_TAG=$(echo "${{ steps.vars.outputs.next-version }}" | sed "s/\..*//")
+
+            git tag $MAJOR_TAG -f -a -m "Update tag with version ${{ steps.vars.outputs.next-version }}"
+            git push origin tag $MAJOR_TAG --force
+          fi
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -76,6 +83,6 @@ jobs:
         with:
           tag_name: ${{ steps.vars.outputs.next-version }}
           release_name: ${{ steps.vars.outputs.next-version }}
-          body: ''
+          body: ""
           draft: false
           prerelease: ${{ steps.vars.outputs.is-pre-release }}
