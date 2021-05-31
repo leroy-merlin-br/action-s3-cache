@@ -90,6 +90,7 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1
     bucket: your-bucket
+    s3-class: STANDARD_IA
     key: ${{ hashFiles('yarn.lock') }}
     artifacts: |
       node_modules/*
