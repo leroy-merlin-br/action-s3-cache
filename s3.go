@@ -12,7 +12,7 @@ import (
 )
 
 // PutObject - Upload object to s3 bucket
-func PutObject(key string, bucket string) error {
+func PutObject(key, bucket, s3class string) error {
 	session := session.Must(session.NewSession())
 	uploader := s3manager.NewUploader(session)
 
@@ -23,9 +23,10 @@ func PutObject(key string, bucket string) error {
 	defer file.Close()
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   file,
+		Bucket:       aws.String(bucket),
+		Key:          aws.String(key),
+		Body:         file,
+		StorageClass: aws.String(s3class),
 	})
 	if err == nil {
 		log.Print("Cache saved successfully")
