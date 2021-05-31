@@ -19,6 +19,7 @@ type (
 	Action struct {
 		Action    string
 		Bucket    string
+		S3Class   string
 		Key       string
 		Artifacts []string
 	}
