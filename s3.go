@@ -12,7 +12,7 @@ import (
 )
 
 // PutObject - Upload object to s3 bucket
-func PutObject(key string, bucket string) error {
+func PutObject(key, bucket, s3Class string) error {
 	session := session.Must(session.NewSession())
 	uploader := s3manager.NewUploader(session)
 
@@ -23,9 +23,10 @@ func PutObject(key string, bucket string) error {
 	defer file.Close()
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   file,
+		Bucket:       aws.String(bucket),
+		Key:          aws.String(key),
+		Body:         file,
+		StorageClass: aws.String(s3Class),
 	})
 	if err == nil {
 		log.Print("Cache saved successfully")
@@ -35,7 +36,7 @@ func PutObject(key string, bucket string) error {
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(key string, bucket string) error {
+func GetObject(key, bucket string) error {
 	session := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(session)
 
@@ -55,7 +56,7 @@ func GetObject(key string, bucket string) error {
 }
 
 // DeleteObject - Delete object from s3 bucket
-func DeleteObject(key string, bucket string) error {
+func DeleteObject(key, bucket string) error {
 	session := session.Must(session.NewSession())
 	service := s3.New(session)
 
@@ -71,7 +72,7 @@ func DeleteObject(key string, bucket string) error {
 }
 
 // ObjectExists - Verify if object exists in s3
-func ObjectExists(key string, bucket string) (bool, error) {
+func ObjectExists(key, bucket string) (bool, error) {
 	session := session.Must(session.NewSession())
 	service := s3.New(session)
 

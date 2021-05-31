@@ -25,6 +25,8 @@ S3 Cache for GitHub Actions supports builds on Linux, Windows and MacOS.
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1 # Or whatever region your bucket was created
     bucket: your-bucket
+    s3-class: ONEZONE_IA # It's STANDARD by default. It can be either STANDARD, 
+    # REDUCED_REDUDANCY, ONEZONE_IA, INTELLIGENT_TIERING, GLACIER, DEEP_ARCHIVE or STANDARD_IA.
     key: ${{ hashFiles('yarn.lock') }}
     artifacts: |
       node_modules*
@@ -88,6 +90,7 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1
     bucket: your-bucket
+    s3-class: STANDARD_IA
     key: ${{ hashFiles('yarn.lock') }}
     artifacts: |
       node_modules/*

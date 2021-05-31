@@ -11,6 +11,7 @@ func main() {
 	action := Action{
 		Action:    os.Getenv("ACTION"),
 		Bucket:    os.Getenv("BUCKET"),
+		S3Class:   os.Getenv("S3_CLASS"),
 		Key:       fmt.Sprintf("%s.zip", os.Getenv("KEY")),
 		Artifacts: strings.Split(strings.TrimSpace(os.Getenv("ARTIFACTS")), "\n"),
 	}
@@ -25,7 +26,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		if err := PutObject(action.Key, action.Bucket); err != nil {
+		if err := PutObject(action.Key, action.Bucket, action.S3Class); err != nil {
 			log.Fatal(err)
 		}
 	case GetAction:
