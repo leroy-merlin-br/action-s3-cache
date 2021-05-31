@@ -36,7 +36,7 @@ func PutObject(key, bucket, s3class string) error {
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(key string, bucket string) error {
+func GetObject(key, bucket string) error {
 	session := session.Must(session.NewSession())
 	downloader := s3manager.NewDownloader(session)
 
@@ -56,7 +56,7 @@ func GetObject(key string, bucket string) error {
 }
 
 // DeleteObject - Delete object from s3 bucket
-func DeleteObject(key string, bucket string) error {
+func DeleteObject(key, bucket string) error {
 	session := session.Must(session.NewSession())
 	service := s3.New(session)
 
@@ -72,7 +72,7 @@ func DeleteObject(key string, bucket string) error {
 }
 
 // ObjectExists - Verify if object exists in s3
-func ObjectExists(key string, bucket string) (bool, error) {
+func ObjectExists(key, bucket string) (bool, error) {
 	session := session.Must(session.NewSession())
 	service := s3.New(session)
 
