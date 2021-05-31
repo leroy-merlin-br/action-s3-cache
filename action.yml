@@ -25,9 +25,10 @@ inputs:
   artifacts:
     description: "A list of files, directories and glob patterns to cache and restore"
     required: false
-  s3class:
+  s3-class:
     description: "Specifies the desired Storage Class for the object."
     required: false
+    default: STANDARD
 runs:
   using: "composite"
   steps:
@@ -39,7 +40,7 @@ runs:
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
         AWS_REGION: ${{ inputs.aws-region }}
         BUCKET: ${{ inputs.bucket }}
-        S3_CLASS: ${{ inputs.s3class }}
+        S3_CLASS: ${{ inputs.s3-class }}
         KEY: ${{ inputs.key }}
         ARTIFACTS: ${{ inputs.artifacts }}
         OS: ${{ runner.os }}

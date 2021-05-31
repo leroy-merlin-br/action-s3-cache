@@ -25,7 +25,7 @@ S3 Cache for GitHub Actions supports builds on Linux, Windows and MacOS.
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     aws-region: us-east-1 # Or whatever region your bucket was created
     bucket: your-bucket
-    s3class: STANDARD # It's STANDARD by default. It can be either STANDARD, 
+    s3-class: ONEZONE_IA # It's STANDARD by default. It can be either STANDARD, 
     # REDUCED_REDUDANCY, ONEZONE_IA, INTELLIGENT_TIERING, GLACIER, DEEP_ARCHIVE or STANDARD_IA.
     key: ${{ hashFiles('yarn.lock') }}
     artifacts: |
