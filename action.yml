@@ -29,6 +29,10 @@ inputs:
     description: "Specifies the desired Storage Class for the object."
     required: false
     default: STANDARD
+outputs:
+  cache-hit:
+    description: "Wheter the cache was downloaded succesfully or not, only used when the action is GET"
+    value:  ${{ steps.cache-hit.outputs.hit }}
 runs:
   using: "composite"
   steps:
@@ -44,3 +48,7 @@ runs:
         KEY: ${{ inputs.key }}
         ARTIFACTS: ${{ inputs.artifacts }}
         OS: ${{ runner.os }}
+
+    - id: cache-hit 
+      run: echo "::set-output name=hit::$($GITHUB_ACTION_PATH/check-cache-hit.sh ${{ inputs.key }})"
+      shell: bash
