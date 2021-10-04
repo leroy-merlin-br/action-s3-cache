@@ -1,5 +1,7 @@
 package main
 
+import "github.com/aws/aws-sdk-go-v2/service/s3/types"
+
 const (
 	// PutAction - Put artifacts
 	PutAction = "put"
@@ -19,7 +21,7 @@ type (
 	Action struct {
 		Action    string
 		Bucket    string
-		S3Class   string
+		S3Class   types.StorageClass
 		Key       string
 		Artifacts []string
 	}
