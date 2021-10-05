@@ -42,8 +42,6 @@ func PutObject(key, bucket, s3Class string) error {
 func GetObject(key, bucket string) error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	session := s3.NewFromConfig(cfg)
-	//session := session.Must(session.NewSession())
-	//downloader := s3manager.NewDownloader(session)
 
 	i := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
