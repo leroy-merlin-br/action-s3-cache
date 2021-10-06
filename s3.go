@@ -14,6 +14,10 @@ import (
 // PutObject - Upload object to s3 bucket
 func PutObject(key, bucket, s3Class string) error {
 	session := session.Must(session.NewSession())
+	endpoint := os.Getenv("AWS_ENDPOINT")
+	if endpoint != "" {
+		session.Config.Endpoint = aws.String(endpoint)
+	}
 	uploader := s3manager.NewUploader(session)
 
 	file, err := os.Open(key)
@@ -38,6 +42,10 @@ func PutObject(key, bucket, s3Class string) error {
 // GetObject - Get object from s3 bucket
 func GetObject(key, bucket string) error {
 	session := session.Must(session.NewSession())
+	endpoint := os.Getenv("AWS_ENDPOINT")
+	if endpoint != "" {
+		session.Config.Endpoint = aws.String(endpoint)
+	}
 	downloader := s3manager.NewDownloader(session)
 
 	file, err := os.Create(key)
@@ -58,6 +66,10 @@ func GetObject(key, bucket string) error {
 // DeleteObject - Delete object from s3 bucket
 func DeleteObject(key, bucket string) error {
 	session := session.Must(session.NewSession())
+	endpoint := os.Getenv("AWS_ENDPOINT")
+	if endpoint != "" {
+		session.Config.Endpoint = aws.String(endpoint)
+	}
 	service := s3.New(session)
 
 	_, err := service.DeleteObject(&s3.DeleteObjectInput{
@@ -74,6 +86,10 @@ func DeleteObject(key, bucket string) error {
 // ObjectExists - Verify if object exists in s3
 func ObjectExists(key, bucket string) (bool, error) {
 	session := session.Must(session.NewSession())
+	endpoint := os.Getenv("AWS_ENDPOINT")
+	if endpoint != "" {
+		session.Config.Endpoint = aws.String(endpoint)
+	}
 	service := s3.New(session)
 
 	if _, err := service.HeadObject(&s3.HeadObjectInput{
