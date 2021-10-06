@@ -7,14 +7,35 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/pkg/errors"
 )
 
+func loadCustomEndpoint() aws.EndpointResolverFunc {
+	endpoint := os.Getenv("AWS_ENDPOINT")
+	awsRegion := os.Getenv("AWS_REGION")
+
+	return aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+		if endpoint != "" {
+			return aws.Endpoint{
+				PartitionID:   "aws",
+				URL:           endpoint,
+				SigningRegion: awsRegion,
+			}, nil
+		}
+
+		return aws.Endpoint{}, nil
+	})
+}
+
 // PutObject - Upload object to s3 bucket
 func PutObject(key, bucket, s3Class string) error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithEndpointResolver(loadCustomEndpoint()))
+	if err != nil {
+		return err
+	}
 	session := s3.NewFromConfig(cfg)
 
 	file, err := os.Open(key)
@@ -40,15 +61,25 @@ func PutObject(key, bucket, s3Class string) error {
 
 // GetObject - Get object from s3 bucket
 func GetObject(key, bucket string) error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithEndpointResolver(loadCustomEndpoint()))
+	if err != nil {
+		return err
+	}
 	session := s3.NewFromConfig(cfg)
+
+	downloader := manager.NewDownloader(session)
+
+	file, err := os.Create(key)
+	if err != nil {
+		return err
+	}
 
 	i := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}
 
-	size, err := session.GetObject(context.TODO(), i)
+	size, err := downloader.Download(context.TODO(), file, i)
 
 	log.Printf("Cache downloaded successfully, containing %d bytes", size)
 
@@ -57,7 +88,10 @@ func GetObject(key, bucket string) error {
 
 // DeleteObject - Delete object from s3 bucket
 func DeleteObject(key, bucket string) error {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithEndpointResolver(loadCustomEndpoint()))
+	if err != nil {
+		return err
+	}
 	session := s3.NewFromConfig(cfg)
 
 	i := &s3.DeleteObjectInput{
@@ -75,7 +109,10 @@ func DeleteObject(key, bucket string) error {
 
 // ObjectExists - Verify if object exists in s3
 func ObjectExists(key, bucket string) (bool, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithEndpointResolver(loadCustomEndpoint()))
+	if err != nil {
+		return false, err
+	}
 	session := s3.NewFromConfig(cfg)
 
 	i := &s3.HeadObjectInput{
