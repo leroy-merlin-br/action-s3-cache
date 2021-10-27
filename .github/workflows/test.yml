@@ -65,6 +65,7 @@ jobs:
         run: rm -rf temp
 
       - name: Get cache
+        id: get-cache
         uses: ./
         with:
           action: get
@@ -73,6 +74,9 @@ jobs:
           aws-region: us-east-1
           bucket: ${{ secrets.AWS_BUCKET }}
           key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
+
+      - name: Print get cache output
+        run: echo ${{ steps.get-cache.outputs.cache-hit }}
 
       - name: List cache folder
         shell: bash
