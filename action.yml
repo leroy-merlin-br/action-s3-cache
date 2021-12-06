@@ -29,6 +29,9 @@ inputs:
     description: "Specifies the desired Storage Class for the object."
     required: false
     default: STANDARD
+  endpoint:
+    description: "Custom S3 Endpoint"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -44,3 +47,4 @@ runs:
         KEY: ${{ inputs.key }}
         ARTIFACTS: ${{ inputs.artifacts }}
         OS: ${{ runner.os }}
+        AWS_ENDPOINT: ${{ inputs.endpoint }}

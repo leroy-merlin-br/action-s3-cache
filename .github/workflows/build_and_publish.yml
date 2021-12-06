@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - develop
+      - test/custome-endpoint
 
 jobs:
   build_go_binary_and_release:

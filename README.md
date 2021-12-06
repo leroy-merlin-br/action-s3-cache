@@ -95,3 +95,20 @@ The following example shows a simple pipeline using S3 Cache GitHub Action:
     artifacts: |
       node_modules/*
 ```
+
+Example For S3 Server with Custom Endpoint(Minio, etc)
+```yml
+- name: Checkout
+  uses: actions/checkout@v2
+
+- name: Retrieve cache
+  uses: leroy-merlin-br/action-s3-cache@v1
+  with:
+    action: get
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+    bucket: your-bucket
+    key: ${{ hashFiles('yarn.lock') }}
+    endpoint: https://my-s3-server.example.com # don't forget to add your s3 endpoint here
+```
