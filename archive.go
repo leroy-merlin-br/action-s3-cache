@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -49,9 +50,11 @@ func Zip(filename string, artifacts []string) error {
 				}
 				defer file.Close()
 
-				_, err = io.Copy(writter, file)
+				if _, err := io.Copy(writter, file); err != nil {
+					return err
+				}
 
-				return err
+				return nil
 			})
 		}
 	}
@@ -90,8 +93,13 @@ func Unzip(filename string) error {
 			return err
 		}
 
-		outFile.Close()
-		currentFile.Close()
+		if err := outFile.Close(); err != nil {
+			log.Printf("error closing output file: %+v", err)
+		}
+
+		if err := currentFile.Close(); err != nil {
+			log.Printf("error closing unzip file: %+v", err)
+		}
 	}
 
 	return nil

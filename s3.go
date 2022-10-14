@@ -12,13 +12,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-var session = func() s3Session {
-	cfg, _ := config.LoadDefaultConfig(context.TODO())
-	return s3.NewFromConfig(cfg)
-}()
+func NewCacheMgr() (*CacheMgr, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	return &CacheMgr{
+		Session: s3.NewFromConfig(cfg),
+	}, nil
+}
+
+type CacheMgr struct {
+	Session s3Session
+}
 
 // PutObject - Upload object to s3 bucket
-func PutObject(key, bucket, s3Class string) error {
+func (c *CacheMgr) PutObject(key, bucket, s3Class string) error {
 	file, err := os.Open(key)
 	if err != nil {
 		return err
@@ -32,22 +41,22 @@ func PutObject(key, bucket, s3Class string) error {
 		StorageClass: types.StorageClass(s3Class),
 	}
 
-	_, err = session.PutObject(context.TODO(), i)
-	if err == nil {
-		log.Print("Cache saved successfully")
+	if _, err = c.Session.PutObject(context.TODO(), i); err != nil {
+		return err
 	}
+	log.Print("Cache saved successfully")
 
-	return err
+	return nil
 }
 
 // GetObject - Get object from s3 bucket
-func GetObject(key, bucket string) error {
+func (c *CacheMgr) GetObject(key, bucket string) error {
 	i := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}
 
-	output, err := session.GetObject(context.TODO(), i)
+	output, err := c.Session.GetObject(context.TODO(), i)
 	if err != nil {
 		return err
 	}
@@ -59,32 +68,33 @@ func GetObject(key, bucket string) error {
 }
 
 // DeleteObject - Delete object from s3 bucket
-func DeleteObject(key, bucket string) error {
+func (c *CacheMgr) DeleteObject(key, bucket string) error {
 	i := &s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}
 
-	_, err := session.DeleteObject(context.TODO(), i)
-	if err == nil {
-		log.Print("Cache purged successfully")
+	if _, err := c.Session.DeleteObject(context.TODO(), i); err != nil {
+		return err
 	}
+	log.Print("Cache purged successfully")
 
-	return err
+	return nil
 }
 
 // ObjectExists - Verify if object exists in s3
-func ObjectExists(key, bucket string) (bool, error) {
+func (c *CacheMgr) ObjectExists(key, bucket string) (bool, error) {
 	i := &s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}
 
-	if _, err := session.HeadObject(context.TODO(), i); err != nil {
+	if _, err := c.Session.HeadObject(context.TODO(), i); err != nil {
 		var nsk *types.NoSuchKey
 		if errors.As(err, &nsk) {
 			return false, nil
 		}
+		return false, err
 	}
 
 	return true, nil

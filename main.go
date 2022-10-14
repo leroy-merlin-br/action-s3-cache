@@ -16,6 +16,11 @@ func main() {
 		Artifacts: strings.Split(strings.TrimSpace(os.Getenv("ARTIFACTS")), "\n"),
 	}
 
+	cacheMgr, err := NewCacheMgr()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	switch act := action.Action; act {
 	case PutAction:
 		if len(action.Artifacts[0]) <= 0 {
@@ -26,18 +31,18 @@ func main() {
 			log.Fatal(err)
 		}
 
-		if err := PutObject(action.Key, action.Bucket, action.S3Class); err != nil {
+		if err := cacheMgr.PutObject(action.Key, action.Bucket, action.S3Class); err != nil {
 			log.Fatal(err)
 		}
 	case GetAction:
-		exists, err := ObjectExists(action.Key, action.Bucket)
+		exists, err := cacheMgr.ObjectExists(action.Key, action.Bucket)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Get and and unzip if object exists
 		if exists {
-			if err := GetObject(action.Key, action.Bucket); err != nil {
+			if err := cacheMgr.GetObject(action.Key, action.Bucket); err != nil {
 				log.Fatal(err)
 			}
 
@@ -48,7 +53,7 @@ func main() {
 			log.Printf("No caches found for the following key: %s", action.Key)
 		}
 	case DeleteAction:
-		if err := DeleteObject(action.Key, action.Bucket); err != nil {
+		if err := cacheMgr.DeleteObject(action.Key, action.Bucket); err != nil {
 			log.Fatal(err)
 		}
 	default:

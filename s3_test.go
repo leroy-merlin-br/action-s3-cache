@@ -12,6 +12,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
+// To run acceptance tests locally pointed at the real AWS, in your local shell:
+// $ export S3_TEST_ACC=1
+// Then run:
+// $ make test
+// Make sure you have an AWS key and secret configured for the tests to use.
+const ENV_VAR_TEST_ACC = "S3_TEST_ACC"
+
+var isAcceptanceTest = os.Getenv(ENV_VAR_TEST_ACC) == "1"
+
 func TestPutObject(t *testing.T) {
 
 	validKey := "/tmp/valid-key"
@@ -21,10 +30,17 @@ func TestPutObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Here, we overwrite real AWS calls with our mocked ones.
-	session = &mockedS3Session{
-		ExpectedKey:    validKey,
-		ExpectedBucket: "valid-bucket",
+	cacheMgr, err := NewCacheMgr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isAcceptanceTest {
+		// Here, we overwrite real AWS calls with our mocked ones.
+		cacheMgr.Session = &mockedS3Session{
+			ExpectedKey:    validKey,
+			ExpectedBucket: "valid-bucket",
+		}
 	}
 
 	testCases := []struct {
@@ -65,7 +81,7 @@ func TestPutObject(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			err := PutObject(testCase.Key, testCase.Bucket, testCase.S3Class)
+			err := cacheMgr.PutObject(testCase.Key, testCase.Bucket, testCase.S3Class)
 			if fmt.Sprintf("%+v", err) != testCase.ExpectedErr {
 				t.Fatalf("expected %+v but received %+v", testCase.ExpectedErr, err)
 			}
@@ -75,9 +91,16 @@ func TestPutObject(t *testing.T) {
 
 func TestGetObject(t *testing.T) {
 
-	session = &mockedS3Session{
-		ExpectedKey:    "valid-key",
-		ExpectedBucket: "valid-bucket",
+	cacheMgr, err := NewCacheMgr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isAcceptanceTest {
+		cacheMgr.Session = &mockedS3Session{
+			ExpectedKey:    "valid-key",
+			ExpectedBucket: "valid-bucket",
+		}
 	}
 
 	testCases := []struct {
@@ -107,7 +130,7 @@ func TestGetObject(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			err := GetObject(testCase.Key, testCase.Bucket)
+			err := cacheMgr.GetObject(testCase.Key, testCase.Bucket)
 			if fmt.Sprintf("%+v", err) != testCase.ExpectedErr {
 				t.Fatalf("expected %+v but received %+v", testCase.ExpectedErr, err)
 			}
@@ -117,9 +140,16 @@ func TestGetObject(t *testing.T) {
 
 func TestDeleteObject(t *testing.T) {
 
-	session = &mockedS3Session{
-		ExpectedKey:    "valid-key",
-		ExpectedBucket: "valid-bucket",
+	cacheMgr, err := NewCacheMgr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isAcceptanceTest {
+		cacheMgr.Session = &mockedS3Session{
+			ExpectedKey:    "valid-key",
+			ExpectedBucket: "valid-bucket",
+		}
 	}
 
 	testCases := []struct {
@@ -149,7 +179,7 @@ func TestDeleteObject(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			err := DeleteObject(testCase.Key, testCase.Bucket)
+			err := cacheMgr.DeleteObject(testCase.Key, testCase.Bucket)
 			if fmt.Sprintf("%+v", err) != testCase.ExpectedErr {
 				t.Fatalf("expected %+v but received %+v", testCase.ExpectedErr, err)
 			}
@@ -159,9 +189,16 @@ func TestDeleteObject(t *testing.T) {
 
 func TestObjectExists(t *testing.T) {
 
-	session = &mockedS3Session{
-		ExpectedKey:    "valid-key",
-		ExpectedBucket: "valid-bucket",
+	cacheMgr, err := NewCacheMgr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isAcceptanceTest {
+		cacheMgr.Session = &mockedS3Session{
+			ExpectedKey:    "valid-key",
+			ExpectedBucket: "valid-bucket",
+		}
 	}
 
 	testCases := []struct {
@@ -195,7 +232,7 @@ func TestObjectExists(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			result, err := ObjectExists(testCase.Key, testCase.Bucket)
+			result, err := cacheMgr.ObjectExists(testCase.Key, testCase.Bucket)
 			if fmt.Sprintf("%+v", err) != testCase.ExpectedErr {
 				t.Fatalf("expected %+v but received %+v", testCase.ExpectedErr, err)
 			}
