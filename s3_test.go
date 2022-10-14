@@ -114,7 +114,45 @@ func TestGetObject(t *testing.T) {
 }
 
 func TestDeleteObject(t *testing.T) {
-	// TODO
+
+	session = &mockedS3Session{
+		ExpectedKey:    "valid-key",
+		ExpectedBucket: "valid-bucket",
+	}
+
+	testCases := []struct {
+		Name        string
+		Key         string
+		Bucket      string
+		ExpectedErr string
+	}{
+		{
+			Name:        "Valid inputs",
+			Key:         "valid-key",
+			Bucket:      "valid-bucket",
+			ExpectedErr: "<nil>",
+		},
+		{
+			Name:        "Invalid key",
+			Key:         "invalid",
+			Bucket:      "valid-bucket",
+			ExpectedErr: "unexpected key: invalid",
+		},
+		{
+			Name:        "Invalid bucket",
+			Key:         "valid-key",
+			Bucket:      "invalid",
+			ExpectedErr: "unexpected bucket: invalid",
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			err := DeleteObject(testCase.Key, testCase.Bucket)
+			if fmt.Sprintf("%+v", err) != testCase.ExpectedErr {
+				t.Fatalf("expected %+v but received %+v", testCase.ExpectedErr, err)
+			}
+		})
+	}
 }
 
 func TestObjectExists(t *testing.T) {
@@ -156,8 +194,13 @@ func (m *mockedS3Session) DeleteObject(ctx context.Context, params *s3.DeleteObj
 	if ctx == nil {
 		return nil, errors.New("context is nil")
 	}
-	// TODO
-	return nil, nil
+	if *params.Bucket != m.ExpectedBucket {
+		return nil, fmt.Errorf("unexpected bucket: %s", *params.Bucket)
+	}
+	if *params.Key != m.ExpectedKey {
+		return nil, fmt.Errorf("unexpected key: %s", *params.Key)
+	}
+	return &s3.DeleteObjectOutput{}, nil
 }
 
 func (m *mockedS3Session) HeadObject(ctx context.Context, params *s3.HeadObjectInput, optFns ...func(*s3.Options)) (*s3.HeadObjectOutput, error) {
