@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var session = func() S3Session {
+var session = func() s3Session {
 	cfg, _ := config.LoadDefaultConfig(context.TODO())
 	return s3.NewFromConfig(cfg)
 }()
