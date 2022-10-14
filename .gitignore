@@ -5,3 +5,4 @@ action-s3-cache
 *idea*
 .idea/*
 *.idea/*
+vendor/
