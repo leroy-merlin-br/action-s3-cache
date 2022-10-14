@@ -7,19 +7,75 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 // To run acceptance tests locally pointed at the real AWS, in your local shell:
 // $ export S3_TEST_ACC=1
+// $ export S3_TEST_BUCKET=some-real-bucket
 // Then run:
 // $ make test
 // Make sure you have an AWS key and secret configured for the tests to use.
-const ENV_VAR_TEST_ACC = "S3_TEST_ACC"
+const (
+	ENV_VAR_TEST_ACC   = "S3_TEST_ACC"
+	ENV_VAR_AWS_BUCKET = "S3_TEST_BUCKET"
+)
 
 var isAcceptanceTest = os.Getenv(ENV_VAR_TEST_ACC) == "1"
+
+func TestAcceptance(t *testing.T) {
+	if !isAcceptanceTest {
+		t.Skip(fmt.Sprintf("skipping because %q is not 1", ENV_VAR_TEST_ACC))
+	}
+	bucket := os.Getenv(ENV_VAR_AWS_BUCKET)
+	if bucket == "" {
+		t.Fatalf("need %q set to have an S3 bucket for the test", ENV_VAR_AWS_BUCKET)
+	}
+
+	// Create a file for testing.
+	key := "/tmp/acceptance-tests"
+	if err := os.WriteFile(key, []byte{}, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cacheMgr, err := NewCacheMgr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create an object.
+	if err := cacheMgr.PutObject(key, bucket, "STANDARD"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Make sure it exists.
+	exists, err := cacheMgr.ObjectExists(key, bucket)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !exists {
+		t.Fatal("object was created but doesn't exist")
+	}
+
+	// Make sure we can get it.
+	if err := cacheMgr.GetObject(key, bucket); err != nil {
+		t.Fatal(err)
+	}
+
+	// Now make sure we can delete it.
+	if err := cacheMgr.DeleteObject(key, bucket); err != nil {
+		t.Fatal(err)
+	}
+
+	// Make sure it no longer exists.
+	exists, err = cacheMgr.ObjectExists(key, bucket)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exists {
+		t.Fatal("object was deleted but still exists")
+	}
+}
 
 func TestPutObject(t *testing.T) {
 
@@ -35,12 +91,10 @@ func TestPutObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !isAcceptanceTest {
-		// Here, we overwrite real AWS calls with our mocked ones.
-		cacheMgr.Session = &mockedS3Session{
-			ExpectedKey:    validKey,
-			ExpectedBucket: "valid-bucket",
-		}
+	// Here, we overwrite real AWS calls with our mocked ones.
+	cacheMgr.Session = &mockedS3Session{
+		ExpectedKey:    validKey,
+		ExpectedBucket: "valid-bucket",
 	}
 
 	testCases := []struct {
@@ -96,11 +150,9 @@ func TestGetObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !isAcceptanceTest {
-		cacheMgr.Session = &mockedS3Session{
-			ExpectedKey:    "valid-key",
-			ExpectedBucket: "valid-bucket",
-		}
+	cacheMgr.Session = &mockedS3Session{
+		ExpectedKey:    "valid-key",
+		ExpectedBucket: "valid-bucket",
 	}
 
 	testCases := []struct {
@@ -145,11 +197,9 @@ func TestDeleteObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !isAcceptanceTest {
-		cacheMgr.Session = &mockedS3Session{
-			ExpectedKey:    "valid-key",
-			ExpectedBucket: "valid-bucket",
-		}
+	cacheMgr.Session = &mockedS3Session{
+		ExpectedKey:    "valid-key",
+		ExpectedBucket: "valid-bucket",
 	}
 
 	testCases := []struct {
@@ -194,11 +244,9 @@ func TestObjectExists(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !isAcceptanceTest {
-		cacheMgr.Session = &mockedS3Session{
-			ExpectedKey:    "valid-key",
-			ExpectedBucket: "valid-bucket",
-		}
+	cacheMgr.Session = &mockedS3Session{
+		ExpectedKey:    "valid-key",
+		ExpectedBucket: "valid-bucket",
 	}
 
 	testCases := []struct {
@@ -292,15 +340,12 @@ func (m *mockedS3Session) HeadObject(ctx context.Context, params *s3.HeadObjectI
 		return nil, errors.New("context is nil")
 	}
 	if *params.Bucket != m.ExpectedBucket {
-		// TODO is this correct? There is also a types.NoSuchBucket in the AWS SDK.
-		return nil, &types.NoSuchKey{
-			Message: aws.String("no bucket"),
-		}
+		// This is a real example of the kind of error we get when the bucket doesn't exist.
+		return nil, errors.New("operation error S3: PutObject, https response error StatusCode: 404, RequestID: 2GTH7VQBGCFSND7V, HostID: wH0yX/OG80AtRLVQte7zIcKcAqpZa1Dv0g3R5w14gaTdE9xc992aD7aFj+CyK8YI0LFotS7jAbE=, api error NoSuchBucket: The specified bucket does not exist")
 	}
 	if *params.Key != m.ExpectedKey {
-		return nil, &types.NoSuchKey{
-			Message: aws.String("no key"),
-		}
+		// This is a real example of the kind of error we get when the bucket exists but the key doesn't.
+		return nil, errors.New("operation error S3: HeadObject, https response error StatusCode: 404, RequestID: PCYHBM6JN7JQWC9S, HostID: +Ohjr+/XAy1AXFxs2LxHuweLlWGpxmV3ADJ06olFX/hYX3ln8V9A54iWZCTApKcO/8Q9PdQP0lM=, api error NotFound: Not Found")
 	}
 	return &s3.HeadObjectOutput{}, nil
 }

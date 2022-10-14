@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/pkg/errors"
 )
 
 func NewCacheMgr() (*CacheMgr, error) {
@@ -90,12 +90,12 @@ func (c *CacheMgr) ObjectExists(key, bucket string) (bool, error) {
 	}
 
 	if _, err := c.Session.HeadObject(context.TODO(), i); err != nil {
-		var nsk *types.NoSuchKey
-		if errors.As(err, &nsk) {
+		if strings.Contains(err.Error(), "404") {
+			log.Print("Object doesn't exist")
 			return false, nil
 		}
 		return false, err
 	}
-
+	log.Print("Object exists")
 	return true, nil
 }
