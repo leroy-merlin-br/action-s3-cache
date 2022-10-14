@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
 func TestPutObject(t *testing.T) {
@@ -156,7 +157,52 @@ func TestDeleteObject(t *testing.T) {
 }
 
 func TestObjectExists(t *testing.T) {
-	// TODO
+
+	session = &mockedS3Session{
+		ExpectedKey:    "valid-key",
+		ExpectedBucket: "valid-bucket",
+	}
+
+	testCases := []struct {
+		Name           string
+		Key            string
+		Bucket         string
+		ExpectedResult bool
+		ExpectedErr    string
+	}{
+		{
+			Name:           "Valid inputs",
+			Key:            "valid-key",
+			Bucket:         "valid-bucket",
+			ExpectedResult: true,
+			ExpectedErr:    "<nil>",
+		},
+		{
+			Name:           "Invalid key",
+			Key:            "invalid",
+			Bucket:         "valid-bucket",
+			ExpectedResult: false,
+			ExpectedErr:    "<nil>",
+		},
+		{
+			Name:           "Invalid bucket",
+			Key:            "valid-key",
+			Bucket:         "invalid",
+			ExpectedResult: false,
+			ExpectedErr:    "<nil>",
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			result, err := ObjectExists(testCase.Key, testCase.Bucket)
+			if fmt.Sprintf("%+v", err) != testCase.ExpectedErr {
+				t.Fatalf("expected %+v but received %+v", testCase.ExpectedErr, err)
+			}
+			if result != testCase.ExpectedResult {
+				t.Fatalf("expected %t but received %t", testCase.ExpectedResult, result)
+			}
+		})
+	}
 }
 
 type mockedS3Session struct {
@@ -207,6 +253,20 @@ func (m *mockedS3Session) HeadObject(ctx context.Context, params *s3.HeadObjectI
 	if ctx == nil {
 		return nil, errors.New("context is nil")
 	}
-	// TODO
-	return nil, nil
+	if *params.Bucket != m.ExpectedBucket {
+		// TODO is this correct? There is also a types.NoSuchBucket in the AWS SDK.
+		return nil, &types.NoSuchKey{
+			Message: strPointer("no bucket"),
+		}
+	}
+	if *params.Key != m.ExpectedKey {
+		return nil, &types.NoSuchKey{
+			Message: strPointer("no key"),
+		}
+	}
+	return &s3.HeadObjectOutput{}, nil
+}
+
+func strPointer(s string) *string {
+	return &s
 }
