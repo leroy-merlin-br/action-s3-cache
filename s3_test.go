@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
@@ -256,17 +257,13 @@ func (m *mockedS3Session) HeadObject(ctx context.Context, params *s3.HeadObjectI
 	if *params.Bucket != m.ExpectedBucket {
 		// TODO is this correct? There is also a types.NoSuchBucket in the AWS SDK.
 		return nil, &types.NoSuchKey{
-			Message: strPointer("no bucket"),
+			Message: aws.String("no bucket"),
 		}
 	}
 	if *params.Key != m.ExpectedKey {
 		return nil, &types.NoSuchKey{
-			Message: strPointer("no key"),
+			Message: aws.String("no key"),
 		}
 	}
 	return &s3.HeadObjectOutput{}, nil
-}
-
-func strPointer(s string) *string {
-	return &s
 }
