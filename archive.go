@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -50,6 +51,7 @@ func Zip(filename string, artifacts []string) error {
 				defer file.Close()
 
 				_, err = io.Copy(writter, file)
+				log.Printf("writing file filepath: %s", path)
 
 				return err
 			})

@@ -1,10 +1,6 @@
 name: Test
 on:
-  push:
-    tags-ignore:
-      - "*.*"
-    branches:
-      - "**"
+  pull_request:
 
 jobs:
   test_on_machine:
@@ -75,6 +71,8 @@ jobs:
           bucket: ${{ secrets.S3_CACHE_BUCKET_NAME }}
           key: cache-test-${{ hashFiles('action.yml') }}-${{ matrix.os }}
 
+      - name: Print folder stuff
+        run: ls -a 
       - name: Print get cache output
         run: echo ${{ steps.get-cache.outputs.cache-hit }}
 
