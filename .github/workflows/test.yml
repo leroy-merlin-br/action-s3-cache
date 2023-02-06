@@ -52,11 +52,11 @@ jobs:
         uses: ./
         with:
           action: put
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.S3_CACHE_BUCKET_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_CACHE_BUCKET_SECRET }}
           aws-region: us-east-1
-          bucket: ${{ secrets.AWS_BUCKET }}
-          key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
+          bucket: ${{ secrets.S3_CACHE_BUCKET_NAME }}
+          key: cache-test-${{ hashFiles('action.yml') }}-${{ matrix.os }}
           artifacts: |
             temp/*
 
@@ -69,11 +69,11 @@ jobs:
         uses: ./
         with:
           action: get
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.S3_CACHE_BUCKET_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_CACHE_BUCKET_SECRET }}
           aws-region: us-east-1
-          bucket: ${{ secrets.AWS_BUCKET }}
-          key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
+          bucket: ${{ secrets.S3_CACHE_BUCKET_NAME }}
+          key: cache-test-${{ hashFiles('action.yml') }}-${{ matrix.os }}
 
       - name: Print get cache output
         run: echo ${{ steps.get-cache.outputs.cache-hit }}
@@ -86,8 +86,8 @@ jobs:
         uses: ./
         with:
           action: delete
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.S3_CACHE_BUCKET_KEY }}
+          aws-secret-access-key: ${{ secrets.S3_CACHE_BUCKET_SECRET }}
           aws-region: us-east-1
-          bucket: ${{ secrets.AWS_BUCKET }}
+          bucket: ${{ secrets.S3_CACHE_BUCKET_NAME }}
           key: ${{ hashFiles('action.yml') }}-${{ matrix.os }}
