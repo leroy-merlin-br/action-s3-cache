@@ -73,6 +73,7 @@ jobs:
 
       - name: Print folder stuff
         run: ls -a 
+        
       - name: Print get cache output
         run: echo ${{ steps.get-cache.outputs.cache-hit }}
 
