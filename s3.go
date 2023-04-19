@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -15,11 +16,14 @@ import (
 // PutObject - Upload object to s3 bucket
 func PutObject(key, bucket, s3Class string) error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return fmt.Errorf("unable to load default SDK config: %w", err)
+	}
 	session := s3.NewFromConfig(cfg)
 
 	file, err := os.Open(key)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to open file %s: %w", key, err)
 	}
 	defer file.Close()
 
@@ -31,16 +35,20 @@ func PutObject(key, bucket, s3Class string) error {
 	}
 
 	_, err = session.PutObject(context.TODO(), i)
-	if err == nil {
-		log.Print("Cache saved successfully")
+	if err != nil {
+		return fmt.Errorf("unable to put object %s in bucket %s: %w", key, bucket, err)
 	}
-
-	return err
+	
+	log.Print("Cache saved successfully")
+	return nil
 }
 
 // GetObject - Get object from s3 bucket
 func GetObject(key, bucket string) error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return fmt.Errorf("unable to load default SDK config: %w", err)
+	}
 	session := s3.NewFromConfig(cfg)
 
 	i := &s3.GetObjectInput{
@@ -49,15 +57,20 @@ func GetObject(key, bucket string) error {
 	}
 
 	size, err := session.GetObject(context.TODO(), i)
+	if err != nil {
+		return fmt.Errorf("unable to get object %s from bucket %s: %w", key, bucket, err)
+	}
 
 	log.Printf("Cache downloaded successfully, containing %d bytes", size)
-
-	return err
+	return nil
 }
 
 // DeleteObject - Delete object from s3 bucket
 func DeleteObject(key, bucket string) error {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return fmt.Errorf("unable to load default SDK config: %w", err)
+	}
 	session := s3.NewFromConfig(cfg)
 
 	i := &s3.DeleteObjectInput{
@@ -66,16 +79,20 @@ func DeleteObject(key, bucket string) error {
 	}
 
 	_, err = session.DeleteObject(context.TODO(), i)
-	if err == nil {
-		log.Print("Cache purged successfully")
+	if err != nil {
+		return fmt.Errorf("unable to delete object %s from bucket %s: %w", key, bucket, err)
 	}
-
-	return err
+	
+	log.Print("Cache purged successfully")
+	return nil
 }
 
 // ObjectExists - Verify if object exists in s3
 func ObjectExists(key, bucket string) (bool, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return false, fmt.Errorf("unable to load default SDK config: %w", err)
+	}
 	session := s3.NewFromConfig(cfg)
 
 	i := &s3.HeadObjectInput{
@@ -88,6 +105,7 @@ func ObjectExists(key, bucket string) (bool, error) {
 		if errors.As(err, &nsk) {
 			return false, nil
 		}
+		return false, fmt.Errorf("unable to retrieve metadata for object %s on bucket %s: %w", key, bucket, err)
 	}
 
 	return true, nil
