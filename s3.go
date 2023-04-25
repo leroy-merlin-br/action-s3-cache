@@ -56,12 +56,12 @@ func GetObject(key, bucket string) error {
 		Key:    aws.String(key),
 	}
 
-	size, err := session.GetObject(context.TODO(), i)
+	getOutput, err := session.GetObject(context.TODO(), i)
 	if err != nil {
 		return fmt.Errorf("unable to get object %s from bucket %s: %w", key, bucket, err)
 	}
 
-	log.Printf("Cache downloaded successfully, containing %d bytes", size)
+	log.Printf("Cache downloaded successfully, containing %d bytes", getOutput.ContentLength)
 	return nil
 }
 
