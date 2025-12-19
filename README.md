@@ -96,4 +96,6 @@ This action uses pre-compiled Go binaries that are built and committed to versio
 
 1. Create a branch and make your code changes to the Go source files
 2. Open a PR targeting `develop`
-3. Once merged, CI will automatically build binaries for all platforms and create a new release (`v1`, `v2`, `v3`, etc.)
+3. Once merged, CI creates a release PR with built binaries for all platforms
+4. Review and merge the release PR
+5. This triggers tag and GitHub release creation (`v1`, `v2`, `v3`, etc.)

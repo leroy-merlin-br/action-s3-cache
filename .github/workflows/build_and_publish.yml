@@ -1,18 +1,22 @@
 name: Build and publish
+
 on:
   push:
-    tags-ignore:
-      - "*.*"
     branches:
       - develop
+  workflow_dispatch:
 
 jobs:
-  setup:
+  build:
     runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.event.head_commit.message, 'release:') }}
     outputs:
       go_version: ${{ steps.go-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extract Go version from go.mod
         id: go-version
@@ -21,21 +25,11 @@ jobs:
           echo "Extracted Go version: $GO_VERSION"
           echo "version=$GO_VERSION" >> "$GITHUB_OUTPUT"
 
-  build_go_binary_and_release:
-    needs: setup
-    name: Build go binary and release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Setup Go
         # As this repo is a public fork the public setup-go action is used here instead of our private one
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ needs.setup.outputs.go_version }}
+          go-version: ${{ steps.go-version.outputs.version }}
 
       - name: Build binaries
         run: make build
@@ -54,27 +48,48 @@ jobs:
 
           echo "next-version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Update version references in README
+      - name: Update README version
         run: make update-readme-version VERSION=${{ steps.next-version.outputs.next-version }}
 
-      - name: Commit and tag release
+      - name: Create release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BRANCH="release/${{ steps.next-version.outputs.next-version }}"
+
           git config --global user.email "${{ github.event.pusher.email }}"
           git config --global user.name "${{ github.event.pusher.name }}"
+          git checkout -b "$BRANCH"
           git add .
-          git commit --message 'release: ${{ steps.next-version.outputs.next-version }}'
-          git tag ${{ steps.next-version.outputs.next-version }}
-          git push origin develop --tags
+          git commit --message "release: ${{ steps.next-version.outputs.next-version }}"
+          git push origin "$BRANCH"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+          gh pr create \
+            --title "release: ${{ steps.next-version.outputs.next-version }}" \
+            --body "Automated release PR with built binaries for ${{ steps.next-version.outputs.next-version }}" \
+            --base develop \
+            --head "$BRANCH"
+
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.event.head_commit.message, 'release:') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from commit message
+        id: version
+        run: |
+          VERSION=$(echo "${{ github.event.head_commit.message }}" | sed 's/release: //')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag and release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.next-version.outputs.next-version }}
-          release_name: ${{ steps.next-version.outputs.next-version }}
-          body: ""
-          draft: false
-          prerelease: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
 
+          gh release create ${{ steps.version.outputs.version }} \
+            --title "${{ steps.version.outputs.version }}" \
+            --generate-notes
