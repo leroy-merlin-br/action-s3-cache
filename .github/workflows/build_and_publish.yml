@@ -10,17 +10,17 @@ on:
 jobs:
   build_go_binary_and_release:
     name: Build go binary and release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup golang
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: ^1.15.5
+          go-version: stable
 
       - name: Build binary
         run: |
